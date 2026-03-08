@@ -10,4 +10,18 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/oauth-api': {
+        target: 'https://uat-miniapp.kbzpay.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/oauth-api/, '')
+      },
+      '/login-api': {
+        target: 'https://wap.kbzpay.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/login-api/, '')
+      }
+    }
+  }
 });

@@ -4,17 +4,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { login } from "@/api/auth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    console.log({ email, password });
-    navigate("/dashboard");
+    try {
+      const response = await login(email, password);
+      // Save token to localStorage
+      localStorage.setItem("token", response.accessToken);
+
+      // Navigate to dashboard
+      navigate("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "An error occurred during login.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -28,6 +43,11 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent>
+          {error && (
+            <div className="mb-4 p-3 text-sm text-red-500 bg-red-100/50 rounded-md">
+              {error}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -37,6 +57,8 @@ export default function LoginPage() {
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                required
               />
             </div>
 
@@ -48,11 +70,13 @@ export default function LoginPage() {
                 placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                required
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
         </CardContent>
