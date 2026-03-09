@@ -5,6 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { login } from "@/api/auth";
+import { useAppStore } from "@/lib/app-store";
+import { useShallow } from "zustand/react/shallow"
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -13,20 +16,30 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const { user, setUser } = useAppStore(useShallow(state => ({
+    user: state.user,
+    setUser: state.setUser
+  })));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const response = await login(email, password);
-      // Save token to localStorage
-      localStorage.setItem("token", response.accessToken);
+      const user = await login(email, password);
 
-      // Navigate to dashboard
-      navigate("/dashboard");
+      if (user) {
+        // Navigate to dashboard
+        setUser(user)
+        navigate("/dashboard");
+        toast.success("Logged in successfully")
+      } else {
+        toast.error("Failed to Login")
+      }
     } catch (err: any) {
       setError(err.message || "An error occurred during login.");
+      toast.error("Failed to Login")
     } finally {
       setLoading(false);
     }
