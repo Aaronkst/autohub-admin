@@ -22,9 +22,8 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const { user, setUser } = useAppStore(
+    const { setUser } = useAppStore(
         useShallow((state) => ({
-            user: state.user,
             setUser: state.setUser
         }))
     );

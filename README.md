@@ -1,73 +1,101 @@
-# React + TypeScript + Vite
+# AutoHub Admin
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Admin dashboard for AutoHub — built with React, TypeScript, Vite, and shadcn/ui.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+| Layer        | Technology                             |
+| ------------ | -------------------------------------- |
+| Framework    | React 19 + TypeScript                  |
+| Build        | Vite 7                                 |
+| Styling      | Tailwind CSS v4 + shadcn/ui (Radix UI) |
+| State        | Zustand (with Immer middleware)         |
+| HTTP Client  | Axios                                  |
+| Routing      | React Router DOM v7                    |
+| Font         | Geist Variable                         |
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
 
-## Expanding the ESLint configuration
+- Node.js ≥ 18
+- npm
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Install & Run
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The app runs at [http://localhost:5173](http://localhost:5173).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Build for Production
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
+npm run preview
 ```
+
+## Project Structure
+
+```
+src/
+├── api/
+│   ├── auth.ts            # 2-step login (OAuth token → user login)
+│   └── instance.ts        # Axios instance with auto token management
+├── components/
+│   └── ui/                # shadcn/ui components (button, card, dialog, input, label, table, sonner)
+├── lib/
+│   ├── app-store.ts       # Zustand global state (user)
+│   └── utils.ts           # Utility helpers (cn)
+├── pages/
+│   ├── LoginPage.tsx      # Login page with KBZPay 2-step auth
+│   ├── DashboardPage.tsx  # Dashboard (placeholder)
+│   └── AdminManagementPage.tsx  # Admin user table + create modal
+├── App.tsx                # Routes
+├── main.tsx               # Entry point
+└── index.css              # Tailwind + theme tokens
+```
+
+## Routes
+
+| Path                | Page                  | Description               |
+| ------------------- | --------------------- | ------------------------- |
+| `/`                 | LoginPage             | Login with email/password |
+| `/dashboard`        | DashboardPage         | Dashboard (placeholder)   |
+| `/admin-management` | AdminManagementPage   | Admin user management     |
+
+## Authentication Flow
+
+Login uses a **2-step OAuth** flow via KBZPay APIs:
+
+1. **Get access token** — `POST` to KBZPay OAuth endpoint with client credentials (Basic Auth)
+2. **Login** — `POST` to AutoHub login endpoint with email/password + access token in header
+
+On success, the JWT token is saved to `localStorage` and the user is redirected to `/dashboard`.
+
+## Dev Proxy (CORS)
+
+The Vite dev server proxies API requests to avoid CORS issues during local development:
+
+| Local Path    | Proxied To                             |
+| ------------- | -------------------------------------- |
+| `/oauth-api`  | `https://uat-miniapp.kbzpay.com`       |
+| `/login-api`  | `https://wap.kbzpay.com`              |
+| `/kbz`        | KBZPay base (via instance.ts)          |
+
+> **Note:** The proxy only works when the Vite dev server (`npm run dev`) is running.
+
+## Scripts
+
+| Command           | Description            |
+| ----------------- | ---------------------- |
+| `npm run dev`     | Start dev server       |
+| `npm run build`   | TypeScript + Vite build|
+| `npm run lint`    | Run ESLint             |
+| `npm run preview` | Preview production build|
+
+## License
+
+Private — not for redistribution.
