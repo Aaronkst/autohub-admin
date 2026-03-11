@@ -10,6 +10,12 @@ class MiniAppInstance {
             baseURL: "/kbz"
         });
 
+        // Restore user token from localStorage (survives page reloads)
+        const savedToken = localStorage.getItem("kbz_user_token");
+        if (savedToken) {
+            this.userToken = savedToken;
+        }
+
         // Set auto request headers.
         this.client.interceptors.request.use((config) => {
             if (this.accessToken) {

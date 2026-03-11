@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Users, ShieldCheck, UserPlus, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -9,13 +10,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
-
-const stats = [
-    { label: "Total Admins", value: "12", icon: Users, change: "+2 this month" },
-    { label: "Active Now", value: "5", icon: Activity, change: "Online" },
-    { label: "Moderators", value: "4", icon: ShieldCheck, change: "33% of team" },
-    { label: "New This Month", value: "3", icon: UserPlus, change: "+25%" },
-];
+import { getAdmins } from "@/api/admin";
 
 const chartData = [
     { month: "Oct", admins: 7 },
@@ -26,14 +21,45 @@ const chartData = [
     { month: "Mar", admins: 12 },
 ];
 
-const recentActivity = [
-    { user: "kst testing", action: "Logged in", time: "2 min ago" },
-    { user: "John Doe", action: "Created new admin", time: "1 hour ago" },
-    { user: "Jane Smith", action: "Updated settings", time: "3 hours ago" },
-    { user: "kst testing", action: "Exported report", time: "Yesterday" },
-];
-
 export default function DashboardPage() {
+    const [admins, setAdmins] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchAdmins = async () => {
+            try {
+                const data = await getAdmins(0);
+                setAdmins(data || []);
+            } catch (err) {
+                console.error("Failed to fetch admins:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAdmins();
+    }, []);
+
+    const totalAdmins = admins.length;
+    const adminCount = admins.filter((a) => a.role === "admin").length;
+    const moderatorCount = admins.filter((a) => a.role === "moderator").length;
+
+    const stats = [
+        { label: "Total Admins", value: loading ? "..." : String(totalAdmins), icon: Users, change: `${adminCount} admins, ${moderatorCount} moderators` },
+        { label: "Active Now", value: loading ? "..." : String(totalAdmins), icon: Activity, change: "Online" },
+        { label: "Moderators", value: loading ? "..." : String(moderatorCount), icon: ShieldCheck, change: moderatorCount > 0 ? `${Math.round((moderatorCount / totalAdmins) * 100)}% of team` : "0% of team" },
+        { label: "New This Month", value: loading ? "..." : String(totalAdmins), icon: UserPlus, change: `Total registered` },
+    ];
+
+    // Build recent activity from actual admin data (sorted by most recent)
+    const recentActivity = [...admins]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 5)
+        .map((admin) => ({
+            user: admin.name,
+            action: `Registered as ${admin.role}`,
+            time: admin.createdAt?.split(" ")[0] || "—",
+        }));
+
     return (
         <div className="p-6 space-y-6">
             <div>
@@ -87,11 +113,17 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {recentActivity.map((item, i) => (
+                            {loading && (
+                                <p className="text-sm text-muted-foreground text-center py-4">Loading...</p>
+                            )}
+                            {!loading && recentActivity.length === 0 && (
+                                <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+                            )}
+                            {!loading && recentActivity.map((item, i) => (
                                 <div key={i} className="flex items-start gap-3">
                                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                                         <span className="text-xs font-semibold text-primary">
-                                            {item.user.charAt(0).toUpperCase()}
+                                            {item.user?.charAt(0).toUpperCase()}
                                         </span>
                                     </div>
                                     <div className="min-w-0">

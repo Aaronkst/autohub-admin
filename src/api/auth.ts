@@ -17,6 +17,7 @@ export const login = async (
         if (response.data.resCode === "0") {
             const result = response.data.result[0];
             miniAppInstance.userToken = result.token;
+            localStorage.setItem("kbz_user_token", result.token);
             return result.User;
         } else {
             return null;

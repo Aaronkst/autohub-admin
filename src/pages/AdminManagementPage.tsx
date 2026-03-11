@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search, MoreHorizontal, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -28,37 +28,15 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getAdmins } from "@/api/admin";
 
-const dummyAdmins = [
-    {
-        id: "1",
-        name: "kst testing",
-        email: "kst@bruno.com",
-        phone: "09123458976",
-        role: "admin",
-        createdDate: "2026-03-08 14:50:19",
-    },
-    {
-        id: "2",
-        name: "John Doe",
-        email: "john@autohub.com",
-        phone: "09876543210",
-        role: "admin",
-        createdDate: "2026-03-05 10:30:00",
-    },
-    {
-        id: "3",
-        name: "Jane Smith",
-        email: "jane@autohub.com",
-        phone: "09111222333",
-        role: "moderator",
-        createdDate: "2026-03-01 08:15:45",
-    },
-];
 
 export default function AdminManagementPage() {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
+    const [admins, setAdmins] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -66,6 +44,20 @@ export default function AdminManagementPage() {
         password: "",
         role: "",
     });
+
+    useEffect(() => {
+        const fetchAdmins = async () => {
+            try {
+                const data = await getAdmins(0);
+                setAdmins(data || []);
+            } catch (err) {
+                console.error("Failed to fetch admins:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAdmins();
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -78,10 +70,10 @@ export default function AdminManagementPage() {
         setOpen(false);
     };
 
-    const filtered = dummyAdmins.filter(
+    const filtered = admins.filter(
         (a) =>
-            a.name.toLowerCase().includes(search.toLowerCase()) ||
-            a.email.toLowerCase().includes(search.toLowerCase())
+            a.name?.toLowerCase().includes(search.toLowerCase()) ||
+            a.email?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
@@ -142,14 +134,14 @@ export default function AdminManagementPage() {
                 <Card className="border-border">
                     <CardContent className="p-4">
                         <p className="text-sm text-muted-foreground">Total Users</p>
-                        <p className="text-2xl font-bold text-foreground">{dummyAdmins.length}</p>
+                        <p className="text-2xl font-bold text-foreground">{admins.length}</p>
                     </CardContent>
                 </Card>
                 <Card className="border-border">
                     <CardContent className="p-4">
                         <p className="text-sm text-muted-foreground">Admins</p>
                         <p className="text-2xl font-bold text-foreground">
-                            {dummyAdmins.filter((a) => a.role === "admin").length}
+                            {admins.filter((a) => a.role === "admin").length}
                         </p>
                     </CardContent>
                 </Card>
@@ -157,7 +149,7 @@ export default function AdminManagementPage() {
                     <CardContent className="p-4">
                         <p className="text-sm text-muted-foreground">Moderators</p>
                         <p className="text-2xl font-bold text-foreground">
-                            {dummyAdmins.filter((a) => a.role === "moderator").length}
+                            {admins.filter((a) => a.role === "moderator").length}
                         </p>
                     </CardContent>
                 </Card>
@@ -192,13 +184,27 @@ export default function AdminManagementPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filtered.map((admin) => (
+                            {loading && (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                                        Loading admins...
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                            {!loading && filtered.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                                        No admins found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                            {!loading && filtered.map((admin) => (
                                 <TableRow key={admin.id} className="group">
                                     <TableCell className="pl-6">
                                         <div className="flex items-center gap-3">
                                             <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
                                                 <span className="text-sm font-semibold text-primary">
-                                                    {admin.name.charAt(0).toUpperCase()}
+                                                    {admin.name?.charAt(0).toUpperCase()}
                                                 </span>
                                             </div>
                                             <span className="font-medium text-foreground">{admin.name}</span>
@@ -221,11 +227,11 @@ export default function AdminManagementPage() {
                                             variant={admin.role === "admin" ? "default" : "secondary"}
                                             className="capitalize"
                                         >
-                                            {admin.role}
+                                            {admin.role || "unknown"}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="text-sm text-muted-foreground">
-                                        {admin.createdDate.split(" ")[0]}
+                                        {admin.createdAt ? admin.createdAt.split(" ")[0] : "—"}
                                     </TableCell>
                                     <TableCell>
                                         <DropdownMenu>
