@@ -60,6 +60,13 @@ class MiniAppInstance {
         return this.client.post(path, body);
     }
 
+    async patch(path: string, body?: Record<string, unknown> | FormData) {
+        if (!this.accessToken) {
+            await this.getAccessToken();
+        }
+        return this.client.patch(path, body);
+    }
+
     async get(path: string, query?: Record<string, string | number>) {
         if (!this.accessToken) {
             await this.getAccessToken();
