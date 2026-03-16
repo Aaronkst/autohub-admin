@@ -3,6 +3,7 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import AdminManagementPage from "./pages/AdminManagementPage";
 import UserAccountRequestsPage from "./pages/UserAccountRequestsPage";
+import OrdersPage from "./pages/OrdersPage";
 import { Toaster } from "./components/ui/sonner";
 import AppLayout from "./layouts/AppLayout";
 
@@ -19,6 +20,7 @@ export default function App() {
                         path="/user-account-requests"
                         element={<UserAccountRequestsPage />}
                     />
+                    <Route path="/orders" element={<OrdersPage />} />
                 </Route>
             </Routes>
         </BrowserRouter>

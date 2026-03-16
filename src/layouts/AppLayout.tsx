@@ -4,6 +4,7 @@ import {
     ChevronLeft,
     ChevronRight,
     LayoutDashboard,
+    Receipt,
     Shield,
     UserCheck,
 } from "lucide-react";
@@ -68,6 +69,11 @@ export default function AppLayout() {
                         label: "User Account Requests",
                         to: "/user-account-requests",
                         icon: UserCheck,
+                    },
+                    {
+                        label: "Orders",
+                        to: "/orders",
+                        icon: Receipt,
                     },
                 ],
             },
