@@ -5,6 +5,9 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  preview: {
+    allowedHosts: ['autohub-admin.onrender.com']
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
