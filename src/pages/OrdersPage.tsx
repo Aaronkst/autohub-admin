@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AtSign, Mail, Phone, PhoneIcon } from "lucide-react";
+import { AtSign, Loader2Icon, Mail, Phone, PhoneIcon } from "lucide-react";
 
 import { getOrders, type Order } from "@/api/orders";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
     Table,
@@ -13,14 +19,14 @@ import {
     TableCell,
     TableHead,
     TableHeader,
-    TableRow,
+    TableRow
 } from "@/components/ui/table";
 
 const formatPrice = (value: number) => {
     if (!Number.isFinite(value)) return "—";
     return new Intl.NumberFormat(undefined, {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
+        maximumFractionDigits: 2
     }).format(value);
 };
 
@@ -60,14 +66,24 @@ export default function OrdersPage() {
         <div className="p-6 space-y-6">
             <div>
                 <h1 className="text-2xl font-bold text-foreground">Orders</h1>
-                <p className="text-muted-foreground mt-1">View orders placed in AutoHub</p>
+                <p className="text-muted-foreground mt-1">
+                    View orders placed in AutoHub
+                </p>
             </div>
 
             <Card className="border-border">
                 <CardHeader className="flex flex-col lg:flex-row lg:items-center justify-between space-y-0 pb-4 gap-8">
                     <div>
-                        <CardTitle className="text-base font-semibold">Order List</CardTitle>
-                        <CardDescription>{totalCount} orders found</CardDescription>
+                        <CardTitle className="text-base font-semibold">
+                            Order List
+                        </CardTitle>
+                        <CardDescription>
+                            {totalCount === undefined ? (
+                                <Loader2Icon className="animate-spin size-5" />
+                            ) : (
+                                `${totalCount} orders found`
+                            )}
+                        </CardDescription>
                     </div>
                     <form
                         onSubmit={handleSearch}
@@ -79,7 +95,12 @@ export default function OrdersPage() {
                                 placeholder="Search by email..."
                                 className="pl-9"
                                 value={search.email}
-                                onChange={(e) => setSearch((s) => ({ ...s, email: e.target.value }))}
+                                onChange={(e) =>
+                                    setSearch((s) => ({
+                                        ...s,
+                                        email: e.target.value
+                                    }))
+                                }
                             />
                         </div>
                         <div className="relative w-64">
@@ -88,7 +109,12 @@ export default function OrdersPage() {
                                 placeholder="Search by phone..."
                                 className="pl-9"
                                 value={search.phone}
-                                onChange={(e) => setSearch((s) => ({ ...s, phone: e.target.value }))}
+                                onChange={(e) =>
+                                    setSearch((s) => ({
+                                        ...s,
+                                        phone: e.target.value
+                                    }))
+                                }
                             />
                         </div>
                         <Button>Search</Button>
@@ -102,20 +128,28 @@ export default function OrdersPage() {
                                 <TableHead>Contact</TableHead>
                                 <TableHead>Type</TableHead>
                                 <TableHead>Resource</TableHead>
-                                <TableHead className="text-right pr-6">Price</TableHead>
+                                <TableHead className="text-right pr-6">
+                                    Price
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading && (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                                    <TableCell
+                                        colSpan={5}
+                                        className="text-center text-muted-foreground py-8"
+                                    >
                                         Loading orders...
                                     </TableCell>
                                 </TableRow>
                             )}
                             {!loading && orders.length === 0 && (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                                    <TableCell
+                                        colSpan={5}
+                                        className="text-center text-muted-foreground py-8"
+                                    >
                                         No orders found.
                                     </TableCell>
                                 </TableRow>
@@ -134,7 +168,10 @@ export default function OrdersPage() {
                                             )
                                         }
                                         onKeyDown={(e) => {
-                                            if (e.key === "Enter" || e.key === " ") {
+                                            if (
+                                                e.key === "Enter" ||
+                                                e.key === " "
+                                            ) {
                                                 e.preventDefault();
                                                 navigate(
                                                     `/orders/details?order_id=${encodeURIComponent(
@@ -148,17 +185,23 @@ export default function OrdersPage() {
                                             <div className="flex items-center gap-3">
                                                 <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
                                                     <span className="text-sm font-semibold text-primary">
-                                                        {(order.user?.name || order.user?.email || "U")
+                                                        {(
+                                                            order.user?.name ||
+                                                            order.user?.email ||
+                                                            "U"
+                                                        )
                                                             .charAt(0)
                                                             .toUpperCase()}
                                                     </span>
                                                 </div>
                                                 <div className="min-w-0">
                                                     <div className="font-medium text-foreground truncate">
-                                                        {order.user?.name || "Unknown user"}
+                                                        {order.user?.name ||
+                                                            "Unknown user"}
                                                     </div>
                                                     <div className="text-xs text-muted-foreground truncate">
-                                                        {order.user?.email || "—"}
+                                                        {order.user?.email ||
+                                                            "—"}
                                                     </div>
                                                 </div>
                                             </div>
@@ -176,7 +219,10 @@ export default function OrdersPage() {
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant="secondary" className="capitalize">
+                                            <Badge
+                                                variant="secondary"
+                                                className="capitalize"
+                                            >
                                                 {order.type || "unknown"}
                                             </Badge>
                                         </TableCell>

@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
-import { AtSign, Check, Loader2, Mail, Phone, PhoneIcon, X } from "lucide-react";
+import {
+    AtSign,
+    Check,
+    Loader2,
+    Loader2Icon,
+    Mail,
+    Phone,
+    PhoneIcon,
+    X
+} from "lucide-react";
 
 import {
     getAccountRequests,
@@ -90,7 +99,13 @@ export default function UserAccountRequestsPage() {
                         <CardTitle className="text-base font-semibold">
                             Account Requests
                         </CardTitle>
-                        <CardDescription>{totalCount} requests found</CardDescription>
+                        <CardDescription>
+                            {totalCount === undefined ? (
+                                <Loader2Icon className="animate-spin size-5" />
+                            ) : (
+                                `${totalCount} requests found`
+                            )}
+                        </CardDescription>
                     </div>
                     <form
                         onSubmit={handleSearch}
@@ -103,7 +118,10 @@ export default function UserAccountRequestsPage() {
                                 className="pl-9"
                                 value={search.email}
                                 onChange={(e) =>
-                                    setSearch((s) => ({ ...s, email: e.target.value }))
+                                    setSearch((s) => ({
+                                        ...s,
+                                        email: e.target.value
+                                    }))
                                 }
                             />
                         </div>
@@ -114,7 +132,10 @@ export default function UserAccountRequestsPage() {
                                 className="pl-9"
                                 value={search.phone}
                                 onChange={(e) =>
-                                    setSearch((s) => ({ ...s, phone: e.target.value }))
+                                    setSearch((s) => ({
+                                        ...s,
+                                        phone: e.target.value
+                                    }))
                                 }
                             />
                         </div>
@@ -227,114 +248,185 @@ export default function UserAccountRequestsPage() {
                                                 {(() => {
                                                     const normalizedStatus = (
                                                         req.status || ""
-                                                    ).trim().toLowerCase();
-                                                    const isFinal = ["approved", "rejected"].includes(
+                                                    )
+                                                        .trim()
+                                                        .toLowerCase();
+                                                    const isFinal = [
+                                                        "approved",
+                                                        "rejected"
+                                                    ].includes(
                                                         normalizedStatus
                                                     );
-                                                    const requestId = String(req.id);
+                                                    const requestId = String(
+                                                        req.id
+                                                    );
                                                     const isApproving =
-                                                        actionLoading[requestId] === "approved";
+                                                        actionLoading[
+                                                            requestId
+                                                        ] === "approved";
                                                     const isRejecting =
-                                                        actionLoading[requestId] === "rejected";
-                                                    const isBusy = isApproving || isRejecting;
+                                                        actionLoading[
+                                                            requestId
+                                                        ] === "rejected";
+                                                    const isBusy =
+                                                        isApproving ||
+                                                        isRejecting;
 
                                                     return (
                                                         <>
-                                                <Button
-                                                    size="sm"
-                                                    disabled={isFinal || isBusy}
-                                                    onClick={() =>
-                                                        (async () => {
-                                                            try {
-                                                                console.log(
-                                                                    "Approve account request:",
-                                                                    req
-                                                                );
-                                                                setActionLoading((prev) => ({
-                                                                    ...prev,
-                                                                    [requestId]: "approved"
-                                                                }));
-                                                                await updateAccountRequestStatus(
-                                                                    requestId,
-                                                                    "approved"
-                                                                );
-                                                                setRequests((prev) =>
-                                                                    prev.map((r) =>
-                                                                        String(r.id) === requestId
-                                                                            ? { ...r, status: "approved" }
-                                                                            : r
-                                                                    )
-                                                                );
-                                                            } catch (err) {
-                                                                console.error(
-                                                                    "Failed to approve account request:",
-                                                                    err
-                                                                );
-                                                            } finally {
-                                                                setActionLoading((prev) => {
-                                                                    const next = { ...prev };
-                                                                    delete next[requestId];
-                                                                    return next;
-                                                                });
-                                                            }
-                                                        })()
-                                                    }
-                                                >
-                                                    {isApproving ? (
-                                                        <Loader2 className="size-4 mr-1.5 animate-spin" />
-                                                    ) : (
-                                                        <Check className="size-4 mr-1.5" />
-                                                    )}
-                                                    Approve
-                                                </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    disabled={isFinal || isBusy}
-                                                    onClick={() =>
-                                                        (async () => {
-                                                            try {
-                                                                console.log(
-                                                                    "Reject account request:",
-                                                                    req
-                                                                );
-                                                                setActionLoading((prev) => ({
-                                                                    ...prev,
-                                                                    [requestId]: "rejected"
-                                                                }));
-                                                                await updateAccountRequestStatus(
-                                                                    requestId,
-                                                                    "rejected"
-                                                                );
-                                                                setRequests((prev) =>
-                                                                    prev.map((r) =>
-                                                                        String(r.id) === requestId
-                                                                            ? { ...r, status: "rejected" }
-                                                                            : r
-                                                                    )
-                                                                );
-                                                            } catch (err) {
-                                                                console.error(
-                                                                    "Failed to reject account request:",
-                                                                    err
-                                                                );
-                                                            } finally {
-                                                                setActionLoading((prev) => {
-                                                                    const next = { ...prev };
-                                                                    delete next[requestId];
-                                                                    return next;
-                                                                });
-                                                            }
-                                                        })()
-                                                    }
-                                                >
-                                                    {isRejecting ? (
-                                                        <Loader2 className="size-4 mr-1.5 animate-spin" />
-                                                    ) : (
-                                                        <X className="size-4 mr-1.5" />
-                                                    )}
-                                                    Reject
-                                                </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                disabled={
+                                                                    isFinal ||
+                                                                    isBusy
+                                                                }
+                                                                onClick={() =>
+                                                                    (async () => {
+                                                                        try {
+                                                                            console.log(
+                                                                                "Approve account request:",
+                                                                                req
+                                                                            );
+                                                                            setActionLoading(
+                                                                                (
+                                                                                    prev
+                                                                                ) => ({
+                                                                                    ...prev,
+                                                                                    [requestId]:
+                                                                                        "approved"
+                                                                                })
+                                                                            );
+                                                                            await updateAccountRequestStatus(
+                                                                                requestId,
+                                                                                "approved"
+                                                                            );
+                                                                            setRequests(
+                                                                                (
+                                                                                    prev
+                                                                                ) =>
+                                                                                    prev.map(
+                                                                                        (
+                                                                                            r
+                                                                                        ) =>
+                                                                                            String(
+                                                                                                r.id
+                                                                                            ) ===
+                                                                                            requestId
+                                                                                                ? {
+                                                                                                      ...r,
+                                                                                                      status: "approved"
+                                                                                                  }
+                                                                                                : r
+                                                                                    )
+                                                                            );
+                                                                        } catch (err) {
+                                                                            console.error(
+                                                                                "Failed to approve account request:",
+                                                                                err
+                                                                            );
+                                                                        } finally {
+                                                                            setActionLoading(
+                                                                                (
+                                                                                    prev
+                                                                                ) => {
+                                                                                    const next =
+                                                                                        {
+                                                                                            ...prev
+                                                                                        };
+                                                                                    delete next[
+                                                                                        requestId
+                                                                                    ];
+                                                                                    return next;
+                                                                                }
+                                                                            );
+                                                                        }
+                                                                    })()
+                                                                }
+                                                            >
+                                                                {isApproving ? (
+                                                                    <Loader2 className="size-4 mr-1.5 animate-spin" />
+                                                                ) : (
+                                                                    <Check className="size-4 mr-1.5" />
+                                                                )}
+                                                                Approve
+                                                            </Button>
+                                                            <Button
+                                                                variant="destructive"
+                                                                size="sm"
+                                                                disabled={
+                                                                    isFinal ||
+                                                                    isBusy
+                                                                }
+                                                                onClick={() =>
+                                                                    (async () => {
+                                                                        try {
+                                                                            console.log(
+                                                                                "Reject account request:",
+                                                                                req
+                                                                            );
+                                                                            setActionLoading(
+                                                                                (
+                                                                                    prev
+                                                                                ) => ({
+                                                                                    ...prev,
+                                                                                    [requestId]:
+                                                                                        "rejected"
+                                                                                })
+                                                                            );
+                                                                            await updateAccountRequestStatus(
+                                                                                requestId,
+                                                                                "rejected"
+                                                                            );
+                                                                            setRequests(
+                                                                                (
+                                                                                    prev
+                                                                                ) =>
+                                                                                    prev.map(
+                                                                                        (
+                                                                                            r
+                                                                                        ) =>
+                                                                                            String(
+                                                                                                r.id
+                                                                                            ) ===
+                                                                                            requestId
+                                                                                                ? {
+                                                                                                      ...r,
+                                                                                                      status: "rejected"
+                                                                                                  }
+                                                                                                : r
+                                                                                    )
+                                                                            );
+                                                                        } catch (err) {
+                                                                            console.error(
+                                                                                "Failed to reject account request:",
+                                                                                err
+                                                                            );
+                                                                        } finally {
+                                                                            setActionLoading(
+                                                                                (
+                                                                                    prev
+                                                                                ) => {
+                                                                                    const next =
+                                                                                        {
+                                                                                            ...prev
+                                                                                        };
+                                                                                    delete next[
+                                                                                        requestId
+                                                                                    ];
+                                                                                    return next;
+                                                                                }
+                                                                            );
+                                                                        }
+                                                                    })()
+                                                                }
+                                                            >
+                                                                {isRejecting ? (
+                                                                    <Loader2 className="size-4 mr-1.5 animate-spin" />
+                                                                ) : (
+                                                                    <X className="size-4 mr-1.5" />
+                                                                )}
+                                                                Reject
+                                                            </Button>
                                                         </>
                                                     );
                                                 })()}
