@@ -1,6 +1,7 @@
 import { miniAppInstance } from "./instance";
 
 const ORDER_LIST_PATH = "service/bulletin_app__AutoHub/0.0.0/orders/list";
+const ORDER_DETAILS_PATH = "service/bulletin_app__AutoHub/0.0.0/orders/details";
 
 export interface OrderUser {
     id: string;
@@ -22,6 +23,45 @@ export interface GetOrdersOutput {
     total_count: number;
 }
 
+export type OrderDetailsOrder = {
+    id: string;
+    bulletin_app__order_type__CST: "car_part" | "car_sales" | "booking" | (string & {});
+    bulletin_app__data_id__CST: string;
+    bulletin_app__price__CST: number;
+    createdDate: string;
+};
+
+export type BookingData = {
+    id: string;
+    bulletin_app__booking_from_date__CST: string;
+    bulletin_app__booking_to_date__CST: string;
+    bulletin_app__booking_type__CST: string;
+    bulletin_app__driver_id__CST: string;
+    bulletin_app__car_id__CST: string;
+    createdDate: string;
+};
+
+export type SaleCarData = {
+    id: string;
+    bulletin_app__sale_car_model__CST: string;
+    bulletin_app__sale_car_seats__CST: string | number;
+    bulletin_app__sales_car_color__CST: string;
+    createdDate: string;
+};
+
+export type CarPartData = {
+    id: string;
+    bulletin_app__car_parts_category_id__CST: string;
+    createdDate: string;
+};
+
+export type OrderDetails = {
+    order?: Partial<OrderDetailsOrder> | null;
+    booking_data?: Partial<BookingData> | null;
+    sale_car_data?: Partial<SaleCarData> | null;
+    car_part_data?: Partial<CarPartData> | null;
+};
+
 export const getOrders = async (skip = 0): Promise<GetOrdersOutput> => {
     const res = await miniAppInstance.get(ORDER_LIST_PATH, {
         user_token: "dummy",
@@ -39,3 +79,23 @@ export const getOrders = async (skip = 0): Promise<GetOrdersOutput> => {
     return { orders: [], total_count: 0 };
 };
 
+export const getOrderDetails = async (order_id: string): Promise<OrderDetails | null> => {
+    const res = await miniAppInstance.get(ORDER_DETAILS_PATH, {
+        user_token: "dummy",
+        order_id,
+    });
+
+    const payload = res?.data?.result?.[0] ?? res?.data?.result ?? res?.data ?? null;
+    if (!payload || typeof payload !== "object") return null;
+
+    if (
+        "order" in payload ||
+        "booking_data" in payload ||
+        "sale_car_data" in payload ||
+        "car_part_data" in payload
+    ) {
+        return payload as OrderDetails;
+    }
+
+    return { order: payload as Partial<OrderDetailsOrder> };
+};

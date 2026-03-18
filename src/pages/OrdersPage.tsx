@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Mail, Phone, Search } from "lucide-react";
 
 import { getOrders, type Order } from "@/api/orders";
@@ -23,6 +24,7 @@ const formatPrice = (value: number) => {
 };
 
 export default function OrdersPage() {
+    const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [orders, setOrders] = useState<Order[]>([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -118,7 +120,27 @@ export default function OrdersPage() {
 
                             {!loading &&
                                 filtered.map((order, index) => (
-                                    <TableRow key={order.id ?? String(index)} className="group">
+                                    <TableRow
+                                        key={order.id ?? String(index)}
+                                        className="group cursor-pointer"
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() =>
+                                            navigate(
+                                                `/orders/details?order_id=${encodeURIComponent(order.id)}`
+                                            )
+                                        }
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                navigate(
+                                                    `/orders/details?order_id=${encodeURIComponent(
+                                                        order.id
+                                                    )}`
+                                                );
+                                            }
+                                        }}
+                                    >
                                         <TableCell className="pl-6">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
@@ -170,4 +192,3 @@ export default function OrdersPage() {
         </div>
     );
 }
-

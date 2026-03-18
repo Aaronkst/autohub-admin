@@ -4,6 +4,7 @@ import DashboardPage from "./pages/DashboardPage";
 import AdminManagementPage from "./pages/AdminManagementPage";
 import UserAccountRequestsPage from "./pages/UserAccountRequestsPage";
 import OrdersPage from "./pages/OrdersPage";
+import OrderDetailsPage from "./pages/OrderDetailsPage";
 import { Toaster } from "./components/ui/sonner";
 import AppLayout from "./layouts/AppLayout";
 
@@ -21,6 +22,7 @@ export default function App() {
                         element={<UserAccountRequestsPage />}
                     />
                     <Route path="/orders" element={<OrdersPage />} />
+                    <Route path="/orders/details" element={<OrderDetailsPage />} />
                 </Route>
             </Routes>
         </BrowserRouter>
