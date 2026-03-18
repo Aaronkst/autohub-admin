@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Check, Loader2, Mail, Phone, Search, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AtSign, Check, Loader2, Mail, Phone, PhoneIcon, X } from "lucide-react";
 
 import {
     getAccountRequests,
@@ -7,6 +7,7 @@ import {
     type AccountRequest
 } from "@/api/account-requests";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
     Card,
     CardContent,
@@ -14,7 +15,6 @@ import {
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
     Table,
@@ -40,7 +40,7 @@ const getStatusBadgeVariant = (status: string) => {
 };
 
 export default function UserAccountRequestsPage() {
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState({ email: "", phone: "" });
     const [requests, setRequests] = useState<AccountRequest[]>([]);
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -48,37 +48,30 @@ export default function UserAccountRequestsPage() {
         Record<string, "approved" | "rejected" | undefined>
     >({});
 
+    const fetchRequests = async (searchParams?: URLSearchParams) => {
+        setLoading(true);
+        try {
+            const data = await getAccountRequests(0, searchParams);
+            setRequests(data.account_requests || []);
+            setTotalCount(data.total_counts || 0);
+        } catch (err) {
+            console.error("Failed to fetch account requests:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchRequests = async () => {
-            try {
-                const data = await getAccountRequests(0);
-                setRequests(data.account_requests || []);
-                setTotalCount(data.total_counts || 0);
-            } catch (err) {
-                console.error("Failed to fetch account requests:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchRequests();
     }, []);
 
-    const filtered = useMemo(() => {
-        const query = search.trim().toLowerCase();
-        if (!query) return requests;
-        return requests.filter((r) => {
-            const name = r.user?.name?.toLowerCase() ?? "";
-            const email = r.user?.email?.toLowerCase() ?? "";
-            const phone = r.user?.phone?.toLowerCase() ?? "";
-            const requestType = r.requestType?.toLowerCase() ?? "";
-            return (
-                name.includes(query) ||
-                email.includes(query) ||
-                phone.includes(query) ||
-                requestType.includes(query)
-            );
-        });
-    }, [requests, search]);
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        const params = new URLSearchParams();
+        if (search.email) params.set("email", search.email);
+        if (search.phone) params.set("phone", search.phone);
+        fetchRequests(params);
+    };
 
     return (
         <div className="p-6 space-y-6">
@@ -92,26 +85,41 @@ export default function UserAccountRequestsPage() {
             </div>
 
             <Card className="border-border">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <CardHeader className="flex flex-col lg:flex-row lg:items-center justify-between space-y-0 pb-4 gap-8">
                     <div>
                         <CardTitle className="text-base font-semibold">
                             Account Requests
                         </CardTitle>
-                        <CardDescription>
-                            {search.trim()
-                                ? `Showing ${filtered.length} of ${totalCount}`
-                                : `${totalCount} requests found`}
-                        </CardDescription>
+                        <CardDescription>{totalCount} requests found</CardDescription>
                     </div>
-                    <div className="relative w-72">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search by name, email, phone, type..."
-                            className="pl-9"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
+                    <form
+                        onSubmit={handleSearch}
+                        className="flex flex-col md:flex-row md:items-center gap-2"
+                    >
+                        <div className="relative w-64">
+                            <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by email..."
+                                className="pl-9"
+                                value={search.email}
+                                onChange={(e) =>
+                                    setSearch((s) => ({ ...s, email: e.target.value }))
+                                }
+                            />
+                        </div>
+                        <div className="relative w-64">
+                            <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by phone..."
+                                className="pl-9"
+                                value={search.phone}
+                                onChange={(e) =>
+                                    setSearch((s) => ({ ...s, phone: e.target.value }))
+                                }
+                            />
+                        </div>
+                        <Button>Search</Button>
+                    </form>
                 </CardHeader>
                 <CardContent className="p-0">
                     <Table>
@@ -138,7 +146,7 @@ export default function UserAccountRequestsPage() {
                                     </TableCell>
                                 </TableRow>
                             )}
-                            {!loading && filtered.length === 0 && (
+                            {!loading && requests.length === 0 && (
                                 <TableRow>
                                     <TableCell
                                         colSpan={6}
@@ -150,7 +158,7 @@ export default function UserAccountRequestsPage() {
                             )}
 
                             {!loading &&
-                                filtered.map((req, index) => (
+                                requests.map((req, index) => (
                                     <TableRow
                                         key={req.id ?? String(index)}
                                         className="group"

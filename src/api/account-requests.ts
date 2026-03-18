@@ -25,11 +25,12 @@ export type AccountRequestList = {
     total_counts: number;
 };
 
-export const getAccountRequests = async (skip = 0): Promise<AccountRequestList> => {
-    const res = await miniAppInstance.get(ACCOUNT_REQUEST_LIST_PATH, {
-        user_token: "dummy",
-        skip,
-    });
+export const getAccountRequests = async (skip = 0, searchParams?: URLSearchParams): Promise<AccountRequestList> => {
+    const query: Record<string, string | number> = { user_token: "dummy", skip };
+    if (searchParams) {
+        searchParams.forEach((value, key) => { query[key] = value; });
+    }
+    const res = await miniAppInstance.get(ACCOUNT_REQUEST_LIST_PATH, query);
 
     if (res.data && res.data.result && res.data.result.length > 0) {
         const first = res.data.result[0];
