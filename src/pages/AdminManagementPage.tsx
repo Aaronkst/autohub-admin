@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import {
     Plus,
-    Search,
     MoreHorizontal,
     Mail,
     Phone,
