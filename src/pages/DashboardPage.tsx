@@ -23,13 +23,16 @@ const chartData = [
 
 export default function DashboardPage() {
     const [admins, setAdmins] = useState<any[]>([]);
+    const [totalAdmins, setTotalAdmins] = useState<number>(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchAdmins = async () => {
             try {
                 const data = await getAdmins(0);
-                setAdmins(data || []);
+                console.log("data", data);
+                setAdmins(data.admins);
+                setTotalAdmins(data.total_count);
             } catch (err) {
                 console.error("Failed to fetch admins:", err);
             } finally {
@@ -39,15 +42,19 @@ export default function DashboardPage() {
         fetchAdmins();
     }, []);
 
-    const totalAdmins = admins.length;
-    const adminCount = admins.filter((a) => a.role === "admin").length;
-    const moderatorCount = admins.filter((a) => a.role === "moderator").length;
-
     const stats = [
-        { label: "Total Admins", value: loading ? "..." : String(totalAdmins), icon: Users, change: `${adminCount} admins, ${moderatorCount} moderators` },
-        { label: "Active Now", value: loading ? "..." : String(totalAdmins), icon: Activity, change: "Online" },
-        { label: "Moderators", value: loading ? "..." : String(moderatorCount), icon: ShieldCheck, change: moderatorCount > 0 ? `${Math.round((moderatorCount / totalAdmins) * 100)}% of team` : "0% of team" },
-        { label: "New This Month", value: loading ? "..." : String(totalAdmins), icon: UserPlus, change: `Total registered` },
+        {
+            label: "Total Admins",
+            value: loading ? "..." : String(totalAdmins),
+            icon: Users,
+            change: `${totalAdmins} admins`
+        },
+        {
+            label: "Active Now",
+            value: loading ? "..." : String(totalAdmins),
+            icon: Activity,
+            change: "Online"
+        }
     ];
 
     // Build recent activity from actual admin data (sorted by most recent)
@@ -63,78 +70,85 @@ export default function DashboardPage() {
     return (
         <div className="p-6 space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-                <p className="text-muted-foreground mt-1">Welcome back to AutoHub Admin</p>
+                <h1 className="text-2xl font-bold text-foreground">
+                    Dashboard
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                    Welcome back to AutoHub Admin
+                </p>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {stats.map((stat) => (
-                    <Card key={stat.label} className="border-border">
-                        <CardContent className="p-5">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                                    <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">{stat.change}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                    {stats.map((stat) => (
+                        <Card key={stat.label} className="border-border">
+                            <CardContent className="p-5">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">
+                                            {stat.label}
+                                        </p>
+                                        <p className="text-2xl font-bold text-foreground mt-1">
+                                            {stat.value}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            {stat.change}
+                                        </p>
+                                    </div>
+                                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                        <stat.icon className="h-5 w-5 text-primary" />
+                                    </div>
                                 </div>
-                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                    <stat.icon className="h-5 w-5 text-primary" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Chart */}
-                <Card className="lg:col-span-2 border-border">
-                    <CardHeader>
-                        <CardTitle className="text-base font-semibold">Admin Growth</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={260}>
-                            <BarChart data={chartData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 13% 91%)" />
-                                <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(220 10% 46%)" />
-                                <YAxis tick={{ fontSize: 12 }} stroke="hsl(220 10% 46%)" />
-                                <Tooltip />
-                                <Bar dataKey="admins" fill="hsl(173 58% 39%)" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
                 {/* Recent Activity */}
                 <Card className="border-border">
                     <CardHeader>
-                        <CardTitle className="text-base font-semibold">Recent Activity</CardTitle>
+                        <CardTitle className="text-base font-semibold">
+                            Recent Activity
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
                             {loading && (
-                                <p className="text-sm text-muted-foreground text-center py-4">Loading...</p>
+                                <p className="text-sm text-muted-foreground text-center py-4">
+                                    Loading...
+                                </p>
                             )}
                             {!loading && recentActivity.length === 0 && (
-                                <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+                                <p className="text-sm text-muted-foreground text-center py-4">
+                                    No recent activity
+                                </p>
                             )}
-                            {!loading && recentActivity.map((item, i) => (
-                                <div key={i} className="flex items-start gap-3">
-                                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                                        <span className="text-xs font-semibold text-primary">
-                                            {item.user?.charAt(0).toUpperCase()}
+                            {!loading &&
+                                recentActivity.map((item, i) => (
+                                    <div
+                                        key={i}
+                                        className="flex items-start gap-3"
+                                    >
+                                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                                            <span className="text-xs font-semibold text-primary">
+                                                {item.user
+                                                    ?.charAt(0)
+                                                    .toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium text-foreground">
+                                                {item.user}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {item.action}
+                                            </p>
+                                        </div>
+                                        <span className="ml-auto text-xs text-muted-foreground whitespace-nowrap">
+                                            {item.time}
                                         </span>
                                     </div>
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium text-foreground">{item.user}</p>
-                                        <p className="text-xs text-muted-foreground">{item.action}</p>
-                                    </div>
-                                    <span className="ml-auto text-xs text-muted-foreground whitespace-nowrap">
-                                        {item.time}
-                                    </span>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </CardContent>
                 </Card>
