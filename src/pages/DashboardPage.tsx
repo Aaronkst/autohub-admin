@@ -1,25 +1,7 @@
-import { useState, useEffect } from "react";
-import { Users, ShieldCheck, UserPlus, Activity } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-} from "recharts";
 import { getAdmins } from "@/api/admin";
-
-const chartData = [
-    { month: "Oct", admins: 7 },
-    { month: "Nov", admins: 8 },
-    { month: "Dec", admins: 8 },
-    { month: "Jan", admins: 10 },
-    { month: "Feb", admins: 10 },
-    { month: "Mar", admins: 12 },
-];
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Activity, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
     const [admins, setAdmins] = useState<any[]>([]);
@@ -59,12 +41,16 @@ export default function DashboardPage() {
 
     // Build recent activity from actual admin data (sorted by most recent)
     const recentActivity = [...admins]
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .sort(
+            (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+        )
         .slice(0, 5)
         .map((admin) => ({
             user: admin.name,
             action: `Registered as ${admin.role}`,
-            time: admin.createdAt?.split(" ")[0] || "—",
+            time: admin.createdAt?.split(" ")[0] || "—"
         }));
 
     return (
