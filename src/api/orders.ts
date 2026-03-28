@@ -55,11 +55,20 @@ export type CarPartData = {
     createdDate: string;
 };
 
+export type ServiceBookingData = {
+    bulletin_app__order_id__CST: string;
+    bulletin_app__sc_booking_date__CST: string;
+    bulletin_app__sc_id__CST: string;
+    bulletin_app__service_id__CST: string;
+    id: string;
+}
+
 export type OrderDetails = {
     order?: Partial<OrderDetailsOrder> | null;
     booking_data?: Partial<BookingData> | null;
     sale_car_data?: Partial<SaleCarData> | null;
     car_part_data?: Partial<CarPartData> | null;
+    service_booking?: Partial<ServiceBookingData> | null;
 };
 
 export const getOrders = async (skip = 0, searchParams?: URLSearchParams): Promise<GetOrdersOutput> => {
@@ -93,7 +102,8 @@ export const getOrderDetails = async (order_id: string): Promise<OrderDetails | 
         "order" in payload ||
         "booking_data" in payload ||
         "sale_car_data" in payload ||
-        "car_part_data" in payload
+        "car_part_data" in payload ||
+        "service_booking" in payload
     ) {
         return payload as OrderDetails;
     }

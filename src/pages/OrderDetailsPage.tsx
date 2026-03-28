@@ -6,6 +6,7 @@ import { getOrderDetails, type OrderDetails } from "@/api/orders";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ServiceBookingDetails } from "@/components/ServiceBookingDetails";
 
 const formatPrice = (value: unknown) => {
     const numeric = typeof value === "number" ? value : Number(value);
@@ -67,6 +68,19 @@ const CAR_PART_FIELDS: FieldDef[] = [
     { key: "id", label: "Car Part ID" },
     { key: "bulletin_app__car_parts_category_id__CST", label: "Category ID" },
     { key: "createdDate", label: "Created Date", formatter: formatDateTime },
+];
+
+const SERVICE_BOOKING_FIELDS: FieldDef[] = [
+    { key: "id", label: "Service Booking ID" },
+    { key: "bulletin_app__order_id__CST", label: "Order ID" },
+    {
+        key: "bulletin_app__sc_booking_date__CST",
+        label: "Booking Date",
+        formatter: formatDateTime
+    },
+    { key: "bulletin_app__sc_id__CST", label: "Service Center ID" },
+    { key: "bulletin_app__service_id__CST", label: "Service ID" },
+    { key: "createdDate", label: "Created Date", formatter: formatDateTime }
 ];
 
 function DetailsCard({
@@ -183,7 +197,9 @@ export default function OrderDetailsPage() {
                                 Order Details
                             </h1>
                             <p className="text-muted-foreground">
-                                {orderId ? `Order ID: ${orderId}` : "Select an order to view details"}
+                                {orderId
+                                    ? `Order ID: ${orderId}`
+                                    : "Select an order to view details"}
                             </p>
                         </div>
                     </div>
@@ -199,9 +215,12 @@ export default function OrderDetailsPage() {
             {!orderId ? (
                 <Card className="border-border">
                     <CardHeader>
-                        <CardTitle className="text-base font-semibold">Missing order ID</CardTitle>
+                        <CardTitle className="text-base font-semibold">
+                            Missing order ID
+                        </CardTitle>
                         <CardDescription>
-                            Open this page with <span className="font-mono">order_id</span> in the
+                            Open this page with{" "}
+                            <span className="font-mono">order_id</span> in the
                             query string.
                         </CardDescription>
                     </CardHeader>
@@ -222,8 +241,12 @@ export default function OrderDetailsPage() {
             {loading ? (
                 <Card className="border-border">
                     <CardHeader>
-                        <CardTitle className="text-base font-semibold">Loading…</CardTitle>
-                        <CardDescription>Fetching order details.</CardDescription>
+                        <CardTitle className="text-base font-semibold">
+                            Loading…
+                        </CardTitle>
+                        <CardDescription>
+                            Fetching order details.
+                        </CardDescription>
                     </CardHeader>
                 </Card>
             ) : null}
@@ -233,7 +256,9 @@ export default function OrderDetailsPage() {
                     <DetailsCard
                         title="Order"
                         description="Core order details"
-                        icon={<Receipt className="size-4 text-muted-foreground" />}
+                        icon={
+                            <Receipt className="size-4 text-muted-foreground" />
+                        }
                         data={order}
                         fields={ORDER_FIELDS}
                     />
@@ -242,7 +267,12 @@ export default function OrderDetailsPage() {
                         <DetailsCard
                             title="Booking Details"
                             description="Included for booking orders"
-                            data={(details.booking_data ?? null) as Record<string, unknown> | null}
+                            data={
+                                (details.booking_data ?? null) as Record<
+                                    string,
+                                    unknown
+                                > | null
+                            }
                             fields={BOOKING_FIELDS}
                         />
                     ) : null}
@@ -251,7 +281,12 @@ export default function OrderDetailsPage() {
                         <DetailsCard
                             title="Car Sales Details"
                             description="Included for car sales orders"
-                            data={(details.sale_car_data ?? null) as Record<string, unknown> | null}
+                            data={
+                                (details.sale_car_data ?? null) as Record<
+                                    string,
+                                    unknown
+                                > | null
+                            }
                             fields={CAR_SALES_FIELDS}
                         />
                     ) : null}
@@ -260,9 +295,29 @@ export default function OrderDetailsPage() {
                         <DetailsCard
                             title="Car Part Details"
                             description="Included for car part orders"
-                            data={(details.car_part_data ?? null) as Record<string, unknown> | null}
+                            data={
+                                (details.car_part_data ?? null) as Record<
+                                    string,
+                                    unknown
+                                > | null
+                            }
                             fields={CAR_PART_FIELDS}
                         />
+                    ) : null}
+
+                    {details?.service_booking ? (
+                        // <DetailsCard
+                        //     title="Service Booking Details"
+                        //     description="Included for service center booking"
+                        //     data={
+                        //         (details.service_booking ?? null) as Record<
+                        //             string,
+                        //             unknown
+                        //         > | null
+                        //     }
+                        //     fields={SERVICE_BOOKING_FIELDS}
+                        // />
+                        <ServiceBookingDetails data={details.service_booking} />
                     ) : null}
                 </div>
             ) : null}
