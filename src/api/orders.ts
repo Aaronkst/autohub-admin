@@ -71,8 +71,8 @@ export type OrderDetails = {
     service_booking?: Partial<ServiceBookingData> | null;
 };
 
-export const getOrders = async (skip = 0, searchParams?: URLSearchParams): Promise<GetOrdersOutput> => {
-    const query: Record<string, string | number> = { user_token: "dummy", skip };
+export const getOrders = async (status: "pending" | "done", skip = 0, searchParams?: URLSearchParams): Promise<GetOrdersOutput> => {
+    const query: Record<string, string | number> = { user_token: "dummy", skip, status };
     if (searchParams) {
         searchParams.forEach((value, key) => { query[key] = value; });
     }

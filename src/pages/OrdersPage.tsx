@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AtSign, Loader2Icon, Mail, Phone, PhoneIcon } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { getOrders, type Order } from "@/api/orders";
 import { Badge } from "@/components/ui/badge";
@@ -30,17 +31,20 @@ const formatPrice = (value: number) => {
     }).format(value);
 };
 
+type StatusTab = "pending" | "done";
+
 export default function OrdersPage() {
     const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState<StatusTab>("pending");
     const [search, setSearch] = useState({ email: "", phone: "" });
     const [orders, setOrders] = useState<Order[]>([]);
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
 
-    const fetchOrders = async (searchParams?: URLSearchParams) => {
+    const fetchOrders = async (status: StatusTab, searchParams?: URLSearchParams) => {
         setLoading(true);
         try {
-            const data = await getOrders(0, searchParams);
+            const data = await getOrders(status, 0, searchParams);
             setOrders(data.orders || []);
             setTotalCount(data.total_count || 0);
         } catch (err) {
@@ -51,15 +55,20 @@ export default function OrdersPage() {
     };
 
     useEffect(() => {
-        fetchOrders();
-    }, []);
+        fetchOrders(activeTab);
+    }, [activeTab]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         const params = new URLSearchParams();
         if (search.email) params.set("email", search.email);
         if (search.phone) params.set("phone", search.phone);
-        fetchOrders(params);
+        fetchOrders(activeTab, params);
+    };
+
+    const handleTabChange = (tab: StatusTab) => {
+        setActiveTab(tab);
+        setSearch({ email: "", phone: "" });
     };
 
     return (
@@ -70,6 +79,13 @@ export default function OrdersPage() {
                     View orders placed in AutoHub
                 </p>
             </div>
+
+            <Tabs value={activeTab} onValueChange={(v) => handleTabChange(v as StatusTab)}>
+                <TabsList>
+                    <TabsTrigger value="pending">Pending</TabsTrigger>
+                    <TabsTrigger value="done">Done</TabsTrigger>
+                </TabsList>
+            </Tabs>
 
             <Card className="border-border">
                 <CardHeader className="flex flex-col lg:flex-row lg:items-center justify-between space-y-0 pb-4 gap-8">
