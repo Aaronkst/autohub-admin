@@ -11,15 +11,13 @@ interface ServiceBookingDetailsProps {
 export function ServiceBookingDetails({ data }: ServiceBookingDetailsProps) {
   const [serviceCenterData, setServiceCenterData] =
       useState<ServiceAndCenterData | null>(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if(data.bulletin_app__sc_id__CST && data.bulletin_app__service_id__CST) {
-      setLoading(true)
       getServiceCenterDetails(
           data.bulletin_app__sc_id__CST,
           data.bulletin_app__service_id__CST
-      ).then(setServiceCenterData).finally(() => setLoading(false))
+      ).then(setServiceCenterData)
     }
   }, [data])
 

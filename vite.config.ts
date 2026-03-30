@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   preview: {
-    allowedHosts: ['autohub-admin.onrender.com']
+    allowedHosts: true
   },
   resolve: {
     alias: {

@@ -70,18 +70,6 @@ const CAR_PART_FIELDS: FieldDef[] = [
     { key: "createdDate", label: "Created Date", formatter: formatDateTime },
 ];
 
-const SERVICE_BOOKING_FIELDS: FieldDef[] = [
-    { key: "id", label: "Service Booking ID" },
-    { key: "bulletin_app__order_id__CST", label: "Order ID" },
-    {
-        key: "bulletin_app__sc_booking_date__CST",
-        label: "Booking Date",
-        formatter: formatDateTime
-    },
-    { key: "bulletin_app__sc_id__CST", label: "Service Center ID" },
-    { key: "bulletin_app__service_id__CST", label: "Service ID" },
-    { key: "createdDate", label: "Created Date", formatter: formatDateTime }
-];
 
 function DetailsCard({
     title,
@@ -306,17 +294,6 @@ export default function OrderDetailsPage() {
                     ) : null}
 
                     {details?.service_booking ? (
-                        // <DetailsCard
-                        //     title="Service Booking Details"
-                        //     description="Included for service center booking"
-                        //     data={
-                        //         (details.service_booking ?? null) as Record<
-                        //             string,
-                        //             unknown
-                        //         > | null
-                        //     }
-                        //     fields={SERVICE_BOOKING_FIELDS}
-                        // />
                         <ServiceBookingDetails data={details.service_booking} />
                     ) : null}
                 </div>
